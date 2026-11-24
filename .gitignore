@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.env*
+!.env.example
+src/generated/
+coverage/
+*.log
+
+# Local tools, editor settings and caches
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+*.local
+.*-work/
+.aws/
+
+# Private keys, certificates and database files/backups
+*.key
+*.pem
+*.pfx
+*.p12
+*.bak
+*.mdf
+*.ndf
+*.ldf

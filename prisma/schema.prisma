@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model Household {
+  users                   User[]
+  ownedExpenseCommitment  ExpenseCommitment[]
+  ownedExpenseTransaction ExpenseTransaction[]
+  ownedInventoryBatch     InventoryBatch[]
+  ownedInventoryMovement  InventoryMovement[]
+  ownedShoppingListItem   ShoppingListItem[]
+  ownedStore              Store[]
+  ownedProduct            Product[]
+  ownedDataSource         DataSource[]
+  ownedStoreListing       StoreListing[]
+  ownedPriceSnapshot      PriceSnapshot[]
+  ownedFulfilmentRule     FulfilmentRule[]
+  ownedSavedRecord        SavedRecord[]
+  ownedPurchase           Purchase[]
+  ownedPurchaseLine       PurchaseLine[]
+  ownedPurchaseAdjustment PurchaseAdjustment[]
+
+  id               String          @id @default(uuid()) @db.NVarChar(36)
+  name             String          @db.NVarChar(120)
+  timezone         String          @default("Pacific/Auckland") @db.NVarChar(80)
+  location         String          @default("") @db.NVarChar(120)
+  expiryWindowDays Int             @default(7)
+  averageMonths    Int             @default(3)
+  maxStores        Int             @default(2)
+  singleStore      Boolean         @default(false)
+  reserveDefault   Decimal         @default(0) @db.Decimal(18, 2)
+  alertThreshold   Decimal?        @db.Decimal(8, 2)
+  preferences      String          @default("{}") @db.NVarChar(Max)
+  revision         Int             @default(1)
+  updatedAt        DateTime        @updatedAt
+  budgets          BudgetMonth[]
+  inventory        InventoryItem[]
+  lists            ShoppingList[]
+}
+
+model BudgetMonth {
+  id          String              @id @default(uuid()) @db.NVarChar(36)
+  householdId String              @db.NVarChar(36)
+  household   Household           @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  month       String              @db.NVarChar(7)
+  funds       Decimal             @db.Decimal(18, 2)
+  reserve     Decimal             @db.Decimal(18, 2)
+  completed   Boolean             @default(false)
+  revision    Int                 @default(1)
+  createdAt   DateTime            @default(now())
+  commitments ExpenseCommitment[]
+  purchases   Purchase[]
+
+  @@unique([householdId, month])
+  @@index([householdId])
+}
+
+model ExpenseCommitment {
+  householdId  String               @default("") @db.NVarChar(36)
+  household    Household            @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           String               @id @default(uuid()) @db.NVarChar(36)
+  budgetId     String               @db.NVarChar(36)
+  budget       BudgetMonth          @relation(fields: [budgetId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category     String               @db.NVarChar(30)
+  subcategory  String               @default("") @db.NVarChar(60)
+  description  String               @db.NVarChar(160)
+  planned      Decimal              @db.Decimal(18, 2)
+  frequency    String               @default("monthly") @db.NVarChar(10)
+  inputAmount  Decimal?             @db.Decimal(18, 2)
+  outstanding  Decimal              @db.Decimal(18, 2)
+  recurring    Boolean              @default(true)
+  settlement   String               @default("unpaid") @db.NVarChar(20)
+  revision     Int                  @default(1)
+  transactions ExpenseTransaction[]
+
+  @@index([householdId])
+}
+
+model ExpenseTransaction {
+  householdId  String            @default("") @db.NVarChar(36)
+  household    Household         @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           String            @id @default(uuid()) @db.NVarChar(36)
+  commitmentId String            @db.NVarChar(36)
+  commitment   ExpenseCommitment @relation(fields: [commitmentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  amount       Decimal           @db.Decimal(18, 2)
+  incurredOn   String            @db.NVarChar(10)
+  note         String            @default("") @db.NVarChar(500)
+  revision     Int               @default(1)
+
+  @@index([householdId])
+}
+
+model InventoryItem {
+  id          String           @id @default(uuid()) @db.NVarChar(36)
+  householdId String           @db.NVarChar(36)
+  household   Household        @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  name        String           @db.NVarChar(160)
+  category    String           @db.NVarChar(60)
+  unit        String           @db.NVarChar(10)
+  minimum     Decimal          @default(0) @db.Decimal(18, 6)
+  productId   String?          @db.NVarChar(36)
+  revision    Int              @default(1)
+  batches     InventoryBatch[]
+
+  @@index([householdId])
+}
+
+model InventoryBatch {
+  householdId    String              @default("") @db.NVarChar(36)
+  household      Household           @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String              @id @default(uuid()) @db.NVarChar(36)
+  itemId         String              @db.NVarChar(36)
+  item           InventoryItem       @relation(fields: [itemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quantity       Decimal             @db.Decimal(18, 6)
+  acquiredOn     String              @db.NVarChar(10)
+  expiryDate     String?             @db.NVarChar(10)
+  dateLabel      String              @default("best-before") @db.NVarChar(20)
+  purchaseLineId String?             @db.NVarChar(36)
+  revision       Int                 @default(1)
+  movements      InventoryMovement[]
+
+  @@index([householdId])
+}
+
+model InventoryMovement {
+  householdId String         @default("") @db.NVarChar(36)
+  household   Household      @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          String         @id @default(uuid()) @db.NVarChar(36)
+  batchId     String         @db.NVarChar(36)
+  batch       InventoryBatch @relation(fields: [batchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quantity    Decimal        @db.Decimal(18, 6)
+  reason      String         @db.NVarChar(160)
+  createdAt   DateTime       @default(now())
+
+  @@index([householdId])
+}
+
+model ShoppingList {
+  id          String             @id @default(uuid()) @db.NVarChar(36)
+  householdId String             @db.NVarChar(36)
+  household   Household          @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  name        String             @db.NVarChar(120)
+  revision    Int                @default(1)
+  createdAt   DateTime           @default(now())
+  items       ShoppingListItem[]
+
+  @@index([householdId])
+}
+
+model ShoppingListItem {
+  householdId     String       @default("") @db.NVarChar(36)
+  household       Household    @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              String       @id @default(uuid()) @db.NVarChar(36)
+  listId          String       @db.NVarChar(36)
+  list            ShoppingList @relation(fields: [listId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  inventoryItemId String?      @db.NVarChar(36)
+  productId       String?      @db.NVarChar(36)
+  name            String       @db.NVarChar(160)
+  category        String       @db.NVarChar(60)
+  quantity        Decimal      @db.Decimal(18, 6)
+  unit            String       @db.NVarChar(10)
+  priority        String       @default("normal") @db.NVarChar(10)
+  origin          String       @default("manual") @db.NVarChar(20)
+
+  @@index([householdId])
+}
+
+model Store {
+  householdId String           @default("") @db.NVarChar(36)
+  household   Household        @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          String           @id @default(uuid()) @db.NVarChar(36)
+  name        String           @db.NVarChar(120)
+  retailer    String           @db.NVarChar(100)
+  location    String           @db.NVarChar(120)
+  active      Boolean          @default(true)
+  listings    StoreListing[]
+  rules       FulfilmentRule[]
+
+  @@index([householdId])
+}
+
+model Product {
+  householdId    String         @default("") @db.NVarChar(36)
+  household      Household      @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id             String         @id @default(uuid()) @db.NVarChar(36)
+  name           String         @db.NVarChar(160)
+  normalisedName String         @db.NVarChar(160)
+  category       String         @db.NVarChar(60)
+  brand          String         @default("") @db.NVarChar(100)
+  barcode        String?        @db.NVarChar(40)
+  listings       StoreListing[]
+
+  @@index([householdId])
+}
+
+model DataSource {
+  householdId   String          @default("") @db.NVarChar(36)
+  household     Household       @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id            String          @id @default(uuid()) @db.NVarChar(36)
+  name          String          @db.NVarChar(120)
+  type          String          @db.NVarChar(30)
+  permission    String          @db.NVarChar(1000)
+  freshnessDays Int             @default(7)
+  prices        PriceSnapshot[]
+
+  @@unique([householdId, name])
+  @@index([householdId])
+}
+
+model StoreListing {
+  householdId     String          @default("") @db.NVarChar(36)
+  household       Household       @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              String          @id @default(uuid()) @db.NVarChar(36)
+  storeId         String          @db.NVarChar(36)
+  store           Store           @relation(fields: [storeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productId       String          @db.NVarChar(36)
+  product         Product         @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sku             String          @db.NVarChar(80)
+  packageQuantity Decimal         @db.Decimal(18, 6)
+  unit            String          @db.NVarChar(10)
+  prices          PriceSnapshot[]
+
+  @@unique([storeId, sku])
+  @@index([householdId])
+}
+
+model PriceSnapshot {
+  householdId  String       @default("") @db.NVarChar(36)
+  household    Household    @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id           String       @id @default(uuid()) @db.NVarChar(36)
+  listingId    String       @db.NVarChar(36)
+  listing      StoreListing @relation(fields: [listingId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sourceId     String       @db.NVarChar(36)
+  source       DataSource   @relation(fields: [sourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  observedAt   DateTime
+  importedAt   DateTime     @default(now())
+  price        Decimal      @db.Decimal(18, 2)
+  availability String       @db.NVarChar(20)
+  promotion    String       @default("") @db.NVarChar(200)
+
+  @@unique([listingId, sourceId, observedAt])
+  @@index([householdId])
+}
+
+model FulfilmentRule {
+  householdId   String    @default("") @db.NVarChar(36)
+  household     Household @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id            String    @id @default(uuid()) @db.NVarChar(36)
+  storeId       String    @db.NVarChar(36)
+  store         Store     @relation(fields: [storeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  mode          String    @db.NVarChar(10)
+  minimum       Decimal   @db.Decimal(18, 2)
+  delivery      Decimal?  @db.Decimal(18, 2)
+  freeThreshold Decimal?  @db.Decimal(18, 2)
+  travel        Decimal   @default(0) @db.Decimal(18, 2)
+  source        String    @db.NVarChar(300)
+  observedAt    DateTime  @default(now())
+  revision      Int       @default(1)
+
+  @@unique([storeId, mode])
+  @@index([householdId])
+}
+
+model SavedRecord {
+  householdId String    @default("") @db.NVarChar(36)
+  household   Household @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          String    @id @default(uuid()) @db.NVarChar(36)
+  kind        String    @db.NVarChar(40)
+  payload     String    @db.NVarChar(Max)
+  revision    Int       @default(1)
+  createdAt   DateTime  @default(now())
+
+  @@index([kind, createdAt])
+  @@index([householdId])
+}
+
+model Purchase {
+  householdId     String               @default("") @db.NVarChar(36)
+  household       Household            @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              String               @id @default(uuid()) @db.NVarChar(36)
+  budgetId        String               @db.NVarChar(36)
+  budget          BudgetMonth          @relation(fields: [budgetId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  purchasedOn     String               @db.NVarChar(10)
+  storeName       String               @default("") @db.NVarChar(120)
+  state           String               @default("draft") @db.NVarChar(20)
+  delivery        Decimal              @default(0) @db.Decimal(18, 2)
+  travel          Decimal              @default(0) @db.Decimal(18, 2)
+  total           Decimal              @default(0) @db.Decimal(18, 2)
+  sourcePlanId    String               @db.NVarChar(80)
+  confirmationKey String               @db.NVarChar(100)
+  revision        Int                  @default(1)
+  lines           PurchaseLine[]
+  adjustments     PurchaseAdjustment[]
+
+  @@unique([sourcePlanId])
+  @@unique([confirmationKey])
+  @@index([householdId])
+}
+
+model PurchaseLine {
+  householdId     String    @default("") @db.NVarChar(36)
+  household       Household @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              String    @id @default(uuid()) @db.NVarChar(36)
+  purchaseId      String    @db.NVarChar(36)
+  purchase        Purchase  @relation(fields: [purchaseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  name            String    @db.NVarChar(160)
+  category        String    @db.NVarChar(60)
+  inventoryItemId String?   @db.NVarChar(36)
+  productId       String?   @db.NVarChar(36)
+  quantity        Decimal   @db.Decimal(18, 6)
+  unit            String    @db.NVarChar(10)
+  lineCost        Decimal   @db.Decimal(18, 2)
+  expiryDate      String?   @db.NVarChar(10)
+
+  @@index([householdId])
+}
+
+model PurchaseAdjustment {
+  householdId String    @default("") @db.NVarChar(36)
+  household   Household @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          String    @id @default(uuid()) @db.NVarChar(36)
+  purchaseId  String    @db.NVarChar(36)
+  purchase    Purchase  @relation(fields: [purchaseId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reason      String    @db.NVarChar(500)
+  amount      Decimal   @db.Decimal(18, 2)
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.NVarChar(36)
+  householdId  String        @unique @db.NVarChar(36)
+  household    Household     @relation(fields: [householdId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  email        String        @unique @db.NVarChar(254)
+  name         String        @db.NVarChar(120)
+  passwordHash String        @db.NVarChar(500)
+  role         String        @default("household") @db.NVarChar(20)
+  active       Boolean       @default(true)
+  demo         Boolean       @default(false)
+  revision     Int           @default(1)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  sessions     AuthSession[]
+}
+
+model AuthSession {
+  id          String    @id @default(uuid()) @db.NVarChar(36)
+  userId      String    @db.NVarChar(36)
+  user        User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  refreshHash String    @unique @db.NVarChar(64)
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model AdminAudit {
+  id        String   @id @default(uuid()) @db.NVarChar(36)
+  actorId   String   @db.NVarChar(36)
+  targetId  String   @db.NVarChar(36)
+  action    String   @db.NVarChar(80)
+  createdAt DateTime @default(now())
+}
