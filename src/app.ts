@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { z } from "zod";
-import { systemDb } from "./db.js";
+import { systemDb, databaseAuthentication } from "./db.js";
 import { HttpError, endpoint } from "./http.js";
 import { budgetRoutes } from "./budget.js";
 import { inventoryRoutes } from "./inventory.js";
@@ -18,6 +18,16 @@ export function createApp() {
   const app = express();
   app.disable("x-powered-by");
   app.use(helmet());
+  app.use((_req, res, next) => {
+    res.setHeader("Cache-Control", "no-store");
+    next();
+  });
+  app.get("/", (_req, res) => res.json({
+    service: "Homewise API",
+    status: "running",
+    health: "/api/v1/health",
+    documentation: "/api/v1/openapi.json",
+  }));
   app.use(
     cors({
       origin: (origin, callback) =>
@@ -42,9 +52,9 @@ export function createApp() {
         await systemDb.$queryRaw`SELECT CONVERT(nvarchar(30), SERVERPROPERTY('ProductVersion')) AS version`;
       return {
         status: "ok",
-        database: "SQL Server 2022",
+        database: process.env.SQL_SERVER?.toLowerCase().endsWith(".database.windows.net") ? "Azure SQL Database" : "SQL Server",
         version: versions[0].version,
-        authentication: "Windows",
+        authentication: databaseAuthentication === "windows" ? "Windows" : "SQL",
       };
     },
   );

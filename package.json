@@ -31,7 +31,6 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "jose": "^6.2.15",
-    "msnodesqlv8": "^5.0.0",
     "mssql": "^12.0.0",
     "zod": "^4.1.0"
   },
@@ -44,7 +43,10 @@
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
   },
-  "description": "Homewise household budget and grocery REST API for Windows and SQL Server.",
+  "optionalDependencies": {
+    "msnodesqlv8": "^5.0.0"
+  },
+  "description": "Homewise household budget and grocery REST API for SQL Server and Azure SQL.",
   "engines": {
     "node": ">=24 <25"
   },

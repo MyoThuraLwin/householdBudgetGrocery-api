@@ -1,6 +1,8 @@
 # Homewise API
 
-Express REST API for household budgeting, inventory, price imports, shopping plans and account administration. Database access uses Prisma 7.10.1 and SQL Server 2022 with Windows integrated authentication. Financial and quantity calculations use decimal arithmetic.
+Express REST API for household budgeting, inventory, price imports, shopping plans and account administration. Database access uses Prisma 7.10.1 with SQL Server or Azure SQL Database. Local Windows development supports integrated authentication; Vercel uses the JavaScript SQL driver and SQL authentication. Financial and quantity calculations use decimal arithmetic.
+
+For Vercel Hobby deployment, environment variables, Azure migrations and networking, see [deployment instructions](DEPLOYMENT.md).
 
 ## Prerequisites
 
@@ -86,6 +88,6 @@ Commit `package-lock.json`, `.env.example`, `openapi.json`, Prisma schema/migrat
 
 The `@prisma/config` dependency has a scoped override to patched `effect` 3.22.5. This resolves [GHSA-7589-6fvf-x4pw](https://github.com/advisories/GHSA-7589-6fvf-x4pw) while preserving the pinned Prisma 7.10.1 adapter family. Review this override when upgrading Prisma. CSV parsing uses the patched 7.x release; the Windows adapter's upstream licence and modification notes remain in `src/vendor/`.
 
-The GitHub Actions workflow checks a fresh Windows install, generation, tests, build, contract and dependency audit. It does not deploy or run SQL integration tests against a developer's database.
+The GitHub Actions workflow checks fresh Windows and Linux installs, generation, tests, build, contract and dependency audit. It does not deploy or run SQL integration tests against a developer's database.
 
 This is a local research prototype. Publishing source does not configure public hosting. Demo accounts have public development credentials; public deployment needs separate provisioning and security review. An application licence has not been selected; the third-party Prisma licence applies to the vendored adapter.

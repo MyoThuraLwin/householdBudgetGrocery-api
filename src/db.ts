@@ -1,20 +1,20 @@
 import "dotenv/config";
 import { PrismaClient } from "./generated/prisma/client.js";
-import { PrismaMssql } from "./vendor/windows-adapter.mjs";
+import { PrismaMssql } from "@prisma/adapter-mssql";
+import { databaseSettings } from "./database-config.js";
 import { scopedClient } from "./tenant.js";
 
-const server = process.env.SQL_SERVER ?? "localhost";
-const database = process.env.SQL_DATABASE ?? "HouseholdBudgetGrocery";
+const { authentication, config } = databaseSettings();
+export const databaseAuthentication = authentication;
 const odbc = (value: string) => `{${value.replaceAll("}", "}}")}}`;
-const connectionString = `Driver=${odbc(process.env.SQL_DRIVER ?? "ODBC Driver 17 for SQL Server")};Server=${odbc(server)};Database=${odbc(database)};Trusted_Connection=Yes;Encrypt=Yes;TrustServerCertificate=${process.env.SQL_TRUST_CERTIFICATE === "false" ? "No" : "Yes"};`;
-const adapter = new PrismaMssql({
-  server,
-  database,
-  connectionString,
-  options: { trustedConnection: true },
-  pool: { max: 5, min: 0 },
-  connectionTimeout: 5000,
-} as any);
+// Only local Windows development loads the native ODBC driver. Vercel uses Tedious.
+const adapter = authentication === "windows"
+  ? new (await import("./vendor/windows-adapter.mjs")).PrismaMssql({
+      ...config,
+      connectionString: `Driver=${odbc(process.env.SQL_DRIVER ?? "ODBC Driver 17 for SQL Server")};Server=${odbc(config.server)};Database=${odbc(config.database!)};Trusted_Connection=Yes;Encrypt=Yes;TrustServerCertificate=${config.options?.trustServerCertificate ? "Yes" : "No"};`,
+      options: { trustedConnection: true },
+    } as any)
+  : new PrismaMssql(config);
 export const systemDb = new PrismaClient({ adapter });
 export const db = scopedClient(systemDb);
 export const transaction = <T>(fn: (tx: any) => Promise<T>) =>
