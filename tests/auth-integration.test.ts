@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import { randomUUID } from "node:crypto";
 import { SignJWT, decodeJwt } from "jose";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/application.js";
 import { systemDb as db } from "../src/db.js";
 
 type Session = { user: any; accessToken: string; cookie: string };

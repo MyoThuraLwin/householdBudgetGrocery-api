@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/application.js";
 import { openapi } from "../src/contract.js";
 
 createApp();

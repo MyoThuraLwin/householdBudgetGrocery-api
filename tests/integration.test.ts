@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
 import { createServer } from "node:http";
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/application.js";
 import { systemDb as db } from "../src/db.js";
 
 test(

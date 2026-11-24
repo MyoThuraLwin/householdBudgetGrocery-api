@@ -9,6 +9,7 @@
     "postbuild": "node scripts/copy-vendor-license.mjs",
     "start": "node dist/server.js",
     "test": "tsx --test tests/*.test.ts",
+    "test:deployment": "node --test tests/deployment.test.mjs",
     "db:generate": "prisma generate",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed-auth.ts",
@@ -16,7 +17,7 @@
     "db:demo": "tsx prisma/demo-users.ts",
     "contract": "tsx scripts/export-contract.ts",
     "test:sql": "tsx scripts/test-sql.ts",
-    "check": "npm test && npm run build && npm run contract:check",
+    "check": "npm test && npm run build && npm run test:deployment && npm run contract:check",
     "contract:check": "tsx scripts/check-contract.ts"
   },
   "dependencies": {

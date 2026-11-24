@@ -1,9 +1,14 @@
 # Vercel Hobby and Azure SQL deployment
 
-The API uses Node 24, the Express preset and `src/index.ts`. `vercel.json` sets
+The API uses Node 24, the Express preset and the root `index.js`. `vercel.json` sets
 the build command, omits the optional local Windows driver, and places the
 function in Sydney (`syd1`) near an Australia East SQL database. Builds generate
-Prisma and compile TypeScript; they never migrate or seed a database.
+Prisma and compile TypeScript; they never migrate or seed a database. The root
+entry imports `dist/application.js`, so Vercel runs the ESM output of the checked
+TypeScript build. The application factory is named `src/application.ts` to avoid
+being mistaken for another deployable Express entry. Keep `src/app.ts` and
+`src/index.ts` absent. `npm run test:deployment` checks this exact compiled entry
+with Node, including Helmet's security headers, after `npm run build`.
 
 ## API project environment variables
 

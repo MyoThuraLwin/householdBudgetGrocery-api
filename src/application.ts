@@ -14,8 +14,7 @@ import { CalculationError } from "./domain.js";
 import { authRoutes, authenticate, allowedOrigins } from "./auth.js";
 import { adminRoutes } from "./admin.js";
 
-export function createApp() {
-  const app = express();
+export function createApp(app = express()) {
   app.disable("x-powered-by");
   app.use(helmet());
   app.use((_req, res, next) => {
