@@ -223,6 +223,7 @@ export function openapi() {
                   schema: z.toJSONSchema(r.body, {
                     target: "draft-2020-12",
                     unrepresentable: "any",
+                    io: "input",
                   }),
                 },
               },

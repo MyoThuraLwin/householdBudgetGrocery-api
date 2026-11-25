@@ -64,6 +64,10 @@ npm start
 
 ## Limits
 
+Price-import templates are available as CSV or JSON and contain ten fictional prices across two example supermarkets. Register a data source first; passing its name as the template endpoint's `source` query parameter fills the matching name into each row.
+
+New files use `priceDate` (`YYYY-MM-DD` or `DD/MM/YYYY`), interpreted as the start of that New Zealand calendar day, including daylight saving changes. Legacy `observedAt` timestamps remain supported; supply exactly one date field. Missing/blank `availability` uses the preview request's optional `defaultAvailability` (`unknown` by default, or `available` after the user confirms stock). Explicit row stock statuses take precedence; `not available` is accepted as `unavailable`.
+
 - Optimisation accepts 1–30 items, up to 10 eligible stores and a maximum of 5 used stores. Assignment search is bounded at 100,000 visited nodes; deferral comparisons are bounded at 10,000 nodes each. Results state whether search completed and never claim a proven optimum after a cap.
 - Each item is fulfilled from one listing/store, in whole packages. Unsupported conditional promotions are excluded when marked with `conditional:`.
 - Imports accept at most 1,000 rows and 2 MB of text. All rows must pass validation before commit. Conflicting snapshots and SKU/package changes abort the transaction.

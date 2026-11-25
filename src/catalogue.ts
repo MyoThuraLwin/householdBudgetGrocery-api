@@ -20,22 +20,7 @@ import {
 } from "./domain.js";
 import { save, record, replace } from "./records.js";
 import { getList, touchList, validateProduct } from "./inventory.js";
-
-export const importHeaders = [
-  "source",
-  "observedAt",
-  "store",
-  "retailer",
-  "location",
-  "sku",
-  "name",
-  "category",
-  "packageQuantity",
-  "unit",
-  "price",
-  "availability",
-  "brand",
-];
+import { priceTemplate } from "./price-template.js";
 export async function catalogue(tx: any = db) {
   const listings = await tx.storeListing.findMany({
     include: {
@@ -304,28 +289,23 @@ export function catalogueRoutes(app: Express) {
     "/price-imports/template",
     "CSV or JSON import template",
     undefined,
-    async (req) =>
-      req.query.format === "json"
-        ? {
-            rows: [
-              {
-                source: "My permitted dataset",
-                observedAt: new Date().toISOString(),
-                store: "Selected store",
-                retailer: "Retailer",
-                location: "Auckland",
-                sku: "milk-2l",
-                name: "Milk",
-                category: "Dairy",
-                packageQuantity: "2",
-                unit: "l",
-                price: "4.50",
-                availability: "available",
-                brand: "",
-              },
-            ],
-          }
-        : { csv: importHeaders.join(",") + "\n" },
+    async (req) => {
+      const format = z
+        .enum(["csv", "json"])
+        .default("csv")
+        .parse(req.query.format);
+      const source = z
+        .string()
+        .trim()
+        .min(1)
+        .max(120)
+        .optional()
+        .parse(req.query.source);
+      const template = priceTemplate(source);
+      return format === "json"
+        ? { rows: template.rows }
+        : { csv: template.csv };
+    },
   );
   e(
     "post",
@@ -334,6 +314,7 @@ export function catalogueRoutes(app: Express) {
     z.object({
       format: z.enum(["csv", "json"]),
       content: z.string().min(1).max(2000000),
+      defaultAvailability: z.enum(["available", "unknown"]).default("unknown"),
     }),
     async (_, b) => {
       let raw: unknown[];
@@ -359,7 +340,20 @@ export function catalogueRoutes(app: Express) {
         errors: { row: number; message: string }[] = [];
       const identities = new Map<string, string>();
       for (const [i, input] of raw.entries()) {
-        const parsed = priceRowSchema.safeParse(input);
+        let rowInput = input;
+        if (input && typeof input === "object" && !Array.isArray(input)) {
+          const row = input as Record<string, unknown>;
+          const missingStock =
+            !Object.hasOwn(row, "availability") ||
+            (typeof row.availability === "string" && !row.availability.trim());
+          rowInput = {
+            ...row,
+            availability: missingStock
+              ? b.defaultAvailability
+              : row.availability,
+          };
+        }
+        const parsed = priceRowSchema.safeParse(rowInput);
         if (!parsed.success) {
           errors.push({
             row: i + 1,
@@ -378,7 +372,7 @@ export function catalogueRoutes(app: Express) {
         if (new Date(row.observedAt).getTime() > Date.now() + 60000)
           errors.push({
             row: i + 1,
-            message: "Observation time cannot be in the future.",
+            message: "The date the price was checked cannot be in the future.",
           });
         const identity = [
           row.source,
@@ -398,6 +392,8 @@ export function catalogueRoutes(app: Express) {
         rows,
         errors,
         count: raw.length,
+        unknownStockCount: rows.filter((row) => row.availability === "unknown")
+          .length,
         committed: false,
       });
     },

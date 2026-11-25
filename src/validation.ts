@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { priceDateInstant, priceDateSchema } from "./price-date.js";
 export const amount = z
   .string()
   .regex(
@@ -49,21 +50,49 @@ export const purchaseLineSchema = z.object({
   productId: id.nullable().optional(),
   expiryDate: date.nullable().optional(),
 });
-export const priceRowSchema = z.object({
-  source: z.string().trim().min(1).max(120),
-  observedAt: z.iso.datetime({ offset: true }),
-  store: z.string().trim().min(1).max(120),
-  retailer: z.string().max(100).default("User supplied"),
-  location: z.string().max(120).default(""),
-  sku: z.string().trim().min(1).max(80),
-  name: z.string().trim().min(1).max(160),
-  category: z.string().trim().min(1).max(60),
-  packageQuantity: quantity,
-  unit,
-  price: amount,
-  availability: z.enum(["available", "unavailable", "unknown"]),
-  brand: z.string().max(100).default(""),
-  barcode: z.string().max(40).nullable().optional(),
-  promotion: z.string().max(200).default(""),
-});
+export const priceRowSchema = z
+  .object({
+    source: z.string().trim().min(1).max(120),
+    priceDate: priceDateSchema.optional(),
+    observedAt: z.iso.datetime({ offset: true }).optional(),
+    store: z.string().trim().min(1).max(120),
+    retailer: z.string().max(100).default("User supplied"),
+    location: z.string().max(120).default(""),
+    sku: z.string().trim().min(1).max(80),
+    name: z.string().trim().min(1).max(160),
+    category: z.string().trim().min(1).max(60),
+    packageQuantity: quantity,
+    unit,
+    price: amount,
+    availability: z.preprocess(
+      (value) => {
+        if (typeof value !== "string") return value;
+        const status = value.trim().toLowerCase();
+        return status === "not available" ? "unavailable" : status || undefined;
+      },
+      z.enum(["available", "unavailable", "unknown"]).default("unknown"),
+    ),
+    brand: z.string().max(100).default(""),
+    barcode: z.string().max(40).nullable().optional(),
+    promotion: z.string().max(200).default(""),
+  })
+  .superRefine((row, context) => {
+    if (!row.priceDate && !row.observedAt)
+      context.addIssue({
+        code: "custom",
+        path: ["priceDate"],
+        message: "Enter the date the price was checked, e.g. 2026-11-26.",
+      });
+    if (row.priceDate && row.observedAt)
+      context.addIssue({
+        code: "custom",
+        path: ["priceDate"],
+        message:
+          "Use either priceDate or the legacy observedAt timestamp, not both.",
+      });
+  })
+  .transform(({ priceDate, observedAt, ...row }) => ({
+    ...row,
+    observedAt: observedAt ?? priceDateInstant(priceDate!),
+  }));
 export type PriceRow = z.infer<typeof priceRowSchema>;

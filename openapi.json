@@ -977,8 +977,7 @@
                   "reserveDefault",
                   "alertThreshold",
                   "preferences"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1112,10 +1111,8 @@
                 "required": [
                   "month",
                   "funds",
-                  "reserve",
-                  "completed"
-                ],
-                "additionalProperties": false
+                  "reserve"
+                ]
               }
             }
           }
@@ -1265,8 +1262,7 @@
                   "funds",
                   "reserve",
                   "completed"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1448,13 +1444,9 @@
                 },
                 "required": [
                   "category",
-                  "subcategory",
                   "description",
-                  "frequency",
-                  "recurring",
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1582,15 +1574,11 @@
                 },
                 "required": [
                   "category",
-                  "subcategory",
                   "description",
-                  "frequency",
-                  "recurring",
                   "revision",
                   "outstanding",
                   "settlement"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1660,8 +1648,7 @@
                 },
                 "required": [
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1758,11 +1745,9 @@
                   "revision",
                   "amount",
                   "incurredOn",
-                  "note",
                   "outstanding",
                   "settlement"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1864,12 +1849,10 @@
                   "revision",
                   "amount",
                   "incurredOn",
-                  "note",
                   "outstanding",
                   "settlement",
                   "commitmentRevision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -1969,12 +1952,10 @@
                   "revision",
                   "amount",
                   "incurredOn",
-                  "note",
                   "outstanding",
                   "settlement",
                   "commitmentRevision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -2195,10 +2176,8 @@
                 "required": [
                   "name",
                   "category",
-                  "unit",
-                  "minimum"
-                ],
-                "additionalProperties": false
+                  "unit"
+                ]
               }
             }
           }
@@ -2379,10 +2358,8 @@
                   "name",
                   "category",
                   "unit",
-                  "minimum",
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -2484,10 +2461,8 @@
                   "revision",
                   "quantity",
                   "acquiredOn",
-                  "expiryDate",
-                  "dateLabel"
-                ],
-                "additionalProperties": false
+                  "expiryDate"
+                ]
               }
             }
           }
@@ -2571,10 +2546,8 @@
                 "required": [
                   "revision",
                   "quantity",
-                  "reason",
-                  "expiredAcknowledged"
-                ],
-                "additionalProperties": false
+                  "reason"
+                ]
               }
             }
           }
@@ -2754,8 +2727,7 @@
                 },
                 "required": [
                   "name"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -2895,8 +2867,7 @@
                 "required": [
                   "revision",
                   "name"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3035,11 +3006,8 @@
                   "category",
                   "quantity",
                   "unit",
-                  "priority",
-                  "origin",
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3178,11 +3146,8 @@
                   "category",
                   "quantity",
                   "unit",
-                  "priority",
-                  "origin",
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3250,8 +3215,7 @@
                 },
                 "required": [
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3321,8 +3285,7 @@
                 },
                 "required": [
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3396,8 +3359,7 @@
                 "required": [
                   "revision",
                   "previewId"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3607,20 +3569,15 @@
                         "quantity",
                         "unit",
                         "lineCost"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   }
                 },
                 "required": [
                   "budgetId",
                   "purchasedOn",
-                  "storeName",
-                  "delivery",
-                  "travel",
                   "lines"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3847,8 +3804,7 @@
                         "quantity",
                         "unit",
                         "lineCost"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   },
                   "revision": {
@@ -3860,13 +3816,9 @@
                 "required": [
                   "budgetId",
                   "purchasedOn",
-                  "storeName",
-                  "delivery",
-                  "travel",
                   "lines",
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -3949,8 +3901,7 @@
                 "required": [
                   "revision",
                   "chargesNotRecordedElsewhere"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -4057,18 +4008,15 @@
                         "batchId",
                         "revision",
                         "quantity"
-                      ],
-                      "additionalProperties": false
+                      ]
                     }
                   }
                 },
                 "required": [
                   "revision",
                   "reason",
-                  "amount",
-                  "movements"
-                ],
-                "additionalProperties": false
+                  "amount"
+                ]
               }
             }
           }
@@ -4195,10 +4143,8 @@
                 },
                 "required": [
                   "name",
-                  "retailer",
-                  "location"
-                ],
-                "additionalProperties": false
+                  "retailer"
+                ]
               }
             }
           }
@@ -4461,10 +4407,8 @@
                 "required": [
                   "name",
                   "type",
-                  "permission",
-                  "freshnessDays"
-                ],
-                "additionalProperties": false
+                  "permission"
+                ]
               }
             }
           }
@@ -4586,13 +4530,20 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 2000000
+                  },
+                  "defaultAvailability": {
+                    "default": "unknown",
+                    "type": "string",
+                    "enum": [
+                      "available",
+                      "unknown"
+                    ]
                   }
                 },
                 "required": [
                   "format",
                   "content"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -4736,8 +4687,7 @@
                 },
                 "required": [
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -4796,8 +4746,7 @@
                 },
                 "required": [
                   "listItemId"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -4875,8 +4824,7 @@
                   "listItemId",
                   "productId",
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -4942,11 +4890,8 @@
                   }
                 },
                 "required": [
-                  "listId",
-                  "allowStale",
-                  "allowUnknown"
-                ],
-                "additionalProperties": false
+                  "listId"
+                ]
               }
             }
           }
@@ -5127,8 +5072,7 @@
                   "freeThreshold",
                   "travel",
                   "source"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -5254,8 +5198,7 @@
                   "ruleId",
                   "revision",
                   "travel"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -5363,11 +5306,8 @@
                   "budgetRevision",
                   "storeIds",
                   "mode",
-                  "maxStores",
-                  "allowStale",
-                  "allowUnknown"
-                ],
-                "additionalProperties": false
+                  "maxStores"
+                ]
               }
             }
           }
@@ -5494,8 +5434,7 @@
               "schema": {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
-                "properties": {},
-                "additionalProperties": false
+                "properties": {}
               }
             }
           }
@@ -5692,10 +5631,8 @@
                   }
                 },
                 "required": [
-                  "revision",
-                  "acknowledgeWarnings"
-                ],
-                "additionalProperties": false
+                  "revision"
+                ]
               }
             }
           }
@@ -5765,8 +5702,7 @@
                 },
                 "required": [
                   "revision"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -5895,8 +5831,7 @@
                 "required": [
                   "action",
                   "budgetId"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -6052,8 +5987,7 @@
                   "revision",
                   "listRevision",
                   "alternativeIndex"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -6129,8 +6063,7 @@
                 "required": [
                   "revision",
                   "alternativeIndex"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }

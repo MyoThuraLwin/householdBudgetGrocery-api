@@ -533,6 +533,51 @@ test(
             type: "fixture",
             permission: "Isolated integration test",
           });
+          for (const format of ["csv", "json"]) {
+            const template = await call(
+              `/price-imports/template?format=${format}&source=${encodeURIComponent(name)}`,
+            );
+            const report = await call("/price-imports/preview", "POST", {
+              format,
+              content:
+                format === "csv" ? template.csv : JSON.stringify(template.rows),
+            });
+            recordIds.push(report.id);
+            assert.equal(report.count, 10);
+            assert.deepEqual(report.errors, []);
+            assert.equal(report.unknownStockCount, 10);
+            assert.equal(
+              new Set(report.rows.map((row: any) => row.retailer)).size,
+              2,
+            );
+            const confirmed = await call("/price-imports/preview", "POST", {
+              format,
+              content:
+                format === "csv" ? template.csv : JSON.stringify(template.rows),
+              defaultAvailability: "available",
+            });
+            recordIds.push(confirmed.id);
+            assert.deepEqual(confirmed.errors, []);
+            assert.equal(confirmed.unknownStockCount, 0);
+            assert(
+              confirmed.rows.every(
+                (row: any) => row.availability === "available",
+              ),
+            );
+            const mixed = await call("/price-imports/preview", "POST", {
+              format: "json",
+              content: JSON.stringify([
+                {
+                  ...(format === "json" ? template.rows[0] : confirmed.rows[0]),
+                  availability: "not available",
+                },
+              ]),
+              defaultAvailability: "available",
+            });
+            recordIds.push(mixed.id);
+            assert.deepEqual(mixed.errors, []);
+            assert.equal(mixed.rows[0].availability, "unavailable");
+          }
           const invalid = await call("/price-imports/preview", "POST", {
             format: "json",
             content: JSON.stringify([{ source: name }]),
@@ -555,10 +600,14 @@ test(
           // Exercise the CSV path after the parser's major security update,
           // including spreadsheet BOMs, quoted commas and escaped quotes.
           const csvRow = { ...row, name: `${name}, quoted "item"` };
-          const csv = "\uFEFF" + Object.keys(csvRow).join(",") + "\n" +
-            Object.values(csvRow).map((value) =>
-              `"${String(value).replaceAll('"', '""')}"`,
-            ).join(",") + "\n";
+          const csv =
+            "\uFEFF" +
+            Object.keys(csvRow).join(",") +
+            "\n" +
+            Object.values(csvRow)
+              .map((value) => `"${String(value).replaceAll('"', '""')}"`)
+              .join(",") +
+            "\n";
           const csvPreview = await call("/price-imports/preview", "POST", {
             format: "csv",
             content: csv,
